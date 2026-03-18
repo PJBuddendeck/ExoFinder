@@ -11,6 +11,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Caches
+backend/exoplanet_cache.json
+
 # Environments
 .env
 .venv

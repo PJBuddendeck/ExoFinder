@@ -1,72 +1,91 @@
 import os
+import time
+import json
+import pandas as pd
 from flask import Flask, send_from_directory, jsonify, request
-from flask_cors import CORS # Good for dev, safe for prod
+from flask_cors import CORS
 import pyvo
 import logging
 
-# 1. Setup Logging (Essential for debugging on a real server)
+# Logger setup
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# 2. Initialize Flask
-# static_folder points to where 'npm run build' puts the React files
+# Flask app setup
 app = Flask(__name__, static_folder='../frontend/build', static_url_path='/')
-CORS(app) 
+CORS(app)
 
+# Constants for NASA TAP and caching
 NASA_TAP_URL = "https://exoplanetarchive.ipac.caltech.edu/TAP"
+CACHE_FILE = "exoplanet_cache.json"
+CACHE_TIMEOUT = 86400  # 24 hours in seconds
 
-# --- FRONTEND ROUTES ---
+# Function used by the API endpoint to get data, either from cache or NASA
+# If the cached data is older than 24 hours, it will fetch fresh data from NASA and update the cache
+# If NASA is down, it will attempt to return expired cache as a fallback
+def get_cached_data():
+    now = time.time()
+    
+    # Check if cache exists and is fresh
+    if os.path.exists(CACHE_FILE):
+        file_age = now - os.path.getmtime(CACHE_FILE)
+        if file_age < CACHE_TIMEOUT:
+            logger.info("Valid local cache located. Serving from local cache.")
+            with open(CACHE_FILE, 'r') as f:
+                return json.load(f)
 
-@app.route("/")
-def serve():
-    """Serves the compiled React 'index.html'"""
-    if os.path.exists(app.static_folder):
-        return send_from_directory(app.static_folder, 'index.html')
-    else:
-        return "Frontend not built. Run 'npm run build' in the frontend folder.", 404
-
-# --- API ROUTES ---
+    # Cache is expired or missing: Fetch from NASA
+    logger.info("Cache expired/missing. Fetching fresh data from NASA.")
+    try:
+        service = pyvo.dal.TAPService(NASA_TAP_URL)
+        # Fetch a larger set so we can filter locally
+        query = """
+        SELECT 
+            pl_name, hostname, disc_year, discoverymethod, pl_orbper 
+        FROM ps 
+        WHERE default_flag = 1 
+        ORDER BY disc_year DESC
+        """
+        results = service.search(query)
+        data = results.to_table().to_pandas().to_dict(orient='records')
+        
+        # Save to local file
+        with open(CACHE_FILE, 'w') as f:
+            json.dump(data, f)
+            
+        return data
+    
+    except Exception as e:
+        logger.error(f"NASA Sync Error: {e}")
+        # If NASA is down, try to return expired cache as fallback
+        if os.path.exists(CACHE_FILE):
+            with open(CACHE_FILE, 'r') as f:
+                logger.info("Serving expired cache as fallback.")
+                return json.load(f)
+        return []
 
 @app.route('/api/planets', methods=['GET'])
 def get_planets():
-    """
-    Fetches filtered exoplanet data from NASA.
-    Usage: /api/planets?search=Kepler
-    """
-    search_term = request.args.get('search', '').strip()
+    search_term = request.args.get('search', '').strip().lower()
+    logger.info(f"API request received with search term: '{search_term}'")
     
-    try:
-        service = pyvo.dal.TAPService(NASA_TAP_URL)
-        
-        # We use a f-string for the query. 
-        # Note: In a high-security DB, we'd use parameters to prevent injection.
-        # NASA's TAP is read-only, so this is generally acceptable for this use case.
-        query = f"""
-        SELECT TOP 50 
-            pl_name, hostname, disc_year, discoverymethod 
-        FROM ps 
-        WHERE default_flag = 1 
-        AND LOWER(pl_name) LIKE LOWER('%{search_term}%')
-        ORDER BY disc_year DESC
-        """
-        
-        logger.info(f"Querying NASA for: {search_term}")
-        results = service.search(query)
-        
-        # Convert the Astropy table to a Pandas DataFrame, then to a List of Dicts
-        data = results.to_table().to_pandas().to_dict(orient='records')
-        
-        return jsonify(data)
+    all_planets = get_cached_data()
+    
+    # Filter the list locally in Python
+    if search_term:
+        filtered = [
+            p for p in all_planets 
+            if search_term in p['pl_name'].lower() or search_term in p['hostname'].lower()
+        ]
+    else:
+        filtered = all_planets[:100] # Return top 100 if no search
 
-    except Exception as e:
-        logger.error(f"NASA API Error: {e}")
-        return jsonify({"error": "Failed to fetch data from NASA archive"}), 500
+    return jsonify(filtered[:50]) # Limit return to 50 for performance
 
-# --- CATCH-ALL ---
-
+# Catch-all route to serve React app for any non-API requests (supports client-side routing)
 @app.errorhandler(404)
 def not_found(e):
-    """Ensures React Router handles page refreshes correctly"""
+    logger.info("404 error occurred.")
     return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == "__main__":
