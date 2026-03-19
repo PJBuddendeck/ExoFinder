@@ -1,86 +1,92 @@
 import os
 import time
-import json
+import sqlite3
 import pandas as pd
 from flask import Flask, send_from_directory, jsonify, request
 from flask_cors import CORS
 import pyvo
 import logging
 
-# Logger setup
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Flask app setup
 app = Flask(__name__, static_folder='../frontend/build', static_url_path='/')
 CORS(app)
 
-# Constants for NASA TAP and caching
 NASA_TAP_URL = "https://exoplanetarchive.ipac.caltech.edu/TAP"
-CACHE_FILE = "exoplanet_cache.json"
-CACHE_TIMEOUT = 86400  # 24 hours in seconds
+DB_FILE = "exoplanets.db"
+CACHE_TIMEOUT = 86400  # 24 hours
 
-# Function used by the API endpoint to get data, either from cache or NASA
-# If the cached data is older than 24 hours, it will fetch fresh data from NASA and update the cache
-# If NASA is down, it will attempt to return expired cache as a fallback
-def get_cached_data():
-    now = time.time()
-    
-    # Check if cache exists and is fresh
-    if os.path.exists(CACHE_FILE):
-        file_age = now - os.path.getmtime(CACHE_FILE)
-        if file_age < CACHE_TIMEOUT:
-            logger.info("Valid local cache located. Serving from local cache.")
-            with open(CACHE_FILE, 'r') as f:
-                return json.load(f)
-
-    # Cache is expired or missing: Fetch from NASA
-    logger.info("Cache expired/missing. Fetching fresh data from NASA.")
+# Sync with NASA TAP and store results in SQLite
+def sync_with_nasa():
     try:
+        logger.info("Syncing with NASA TAP...")
         service = pyvo.dal.TAPService(NASA_TAP_URL)
-        # Fetch a larger set so we can filter locally
-        query = """
-        SELECT 
-            pl_name, hostname, disc_year, discoverymethod, pl_orbper 
-        FROM ps 
-        WHERE default_flag = 1 
-        ORDER BY disc_year DESC
-        """
-        results = service.search(query)
-        data = results.to_table().to_pandas().to_dict(orient='records')
+        query = "SELECT " \
+        "pl_name, hostname, disc_year, discoverymethod, pl_orbper " \
+        "FROM ps WHERE default_flag = 1"
         
-        # Save to local file
-        with open(CACHE_FILE, 'w') as f:
-            json.dump(data, f)
-            
-        return data
-    
-    except Exception as e:
-        logger.error(f"NASA Sync Error: {e}")
-        # If NASA is down, try to return expired cache as fallback
-        if os.path.exists(CACHE_FILE):
-            with open(CACHE_FILE, 'r') as f:
-                logger.info("Serving expired cache as fallback.")
-                return json.load(f)
-        return []
+        # Use a timeout if supported, otherwise pyvo uses default
+        results = service.search(query)
+        df = results.to_table().to_pandas()
 
+        with sqlite3.connect(DB_FILE) as conn:
+            # Save the dataframe to SQLite, replacing the old table
+            df.to_sql('planets', conn, if_exists='replace', index=False)
+            # Record the last sync time in a separate metadata table
+            conn.execute("CREATE TABLE IF NOT EXISTS metadata (last_sync REAL)")
+            conn.execute("DELETE FROM metadata")
+            conn.execute("INSERT INTO metadata VALUES (?)", (time.time(),))
+        
+        logger.info("Sync complete.")
+        return True
+    except Exception as e:
+        logger.error(f"NASA Sync Failed: {e}")
+        return False
+
+# Query the database with optional search term and filters
+def get_planets_from_db(search_term=""):
+    if not os.path.exists(DB_FILE):
+        sync_with_nasa()
+
+    # Check if cache is expired
+    with sqlite3.connect(DB_FILE) as conn:
+        cursor = conn.cursor()
+        try:
+            last_sync = cursor.execute("SELECT last_sync FROM metadata").fetchone()[0]
+            if (time.time() - last_sync) > CACHE_TIMEOUT:
+                logger.info("Cache expired. Syncing with NASA TAP...")
+                sync_with_nasa()
+        except:
+            logger.info("No cache found. Syncing with NASA TAP...")
+            sync_with_nasa()
+
+        # Query the data
+        query = "SELECT * FROM planets"
+        params = []
+        if search_term:
+            query += " WHERE LOWER(pl_name) LIKE ? OR LOWER(hostname) LIKE ?"
+            search_param = f"%{search_term}%"
+            params = [search_param, search_param]
+        
+        query += " ORDER BY disc_year DESC LIMIT 50"
+        
+        conn.row_factory = sqlite3.Row # Allows accessing columns by name
+        cursor = conn.cursor()
+        rows = cursor.execute(query, params).fetchall()
+        
+        return [dict(row) for row in rows]
+
+# API endpoint to get planets with optional search query and filters
 @app.route('/api/planets', methods=['GET'])
 def get_planets():
     search_term = request.args.get('search', '').strip().lower()
-    logger.info(f"API request received with search term: '{search_term}'")
-    
-    all_planets = get_cached_data()
-    
-    # Filter the list locally in Python
-    if search_term:
-        filtered = [
-            p for p in all_planets 
-            if search_term in p['pl_name'].lower() or search_term in p['hostname'].lower()
-        ]
-    else:
-        filtered = all_planets[:100] # Return top 100 if no search
-
-    return jsonify(filtered[:50]) # Limit return to 50 for performance
+    try:
+        data = get_planets_from_db(search_term)
+        return jsonify(data)
+    except Exception as e:
+        logger.error(f"Database error: {e}")
+        return jsonify({"error": "Database error"}), 500
 
 # Catch-all route to serve React app for any non-API requests (supports client-side routing)
 @app.errorhandler(404)
