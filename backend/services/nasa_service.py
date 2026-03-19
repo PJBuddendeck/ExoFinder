@@ -1,0 +1,44 @@
+import pyvo
+import logging
+import time
+from config import Config
+from data.planet_repo import PlanetRepository
+
+logger = logging.getLogger(__name__)
+
+# This service handles all interactions with the NASA TAP service, including fetching exoplanet data and determining when to refresh the local cache.
+class NasaService:
+    def __init__(self):
+        self.repo = PlanetRepository()
+
+    # Checks if the local cache is expired based on the last synchronization time and the defined cache timeout.
+    # If expired, it fetches new data from NASA TAP and updates the local database.
+    def sync_if_expired(self):
+        last_sync = self.repo.get_last_sync_time()
+        if (time.time() - last_sync) > Config.CACHE_TIMEOUT:
+            self.fetch_and_store()
+
+    # Fetches exoplanet data from NASA TAP and stores it in the local database. Returns True on success, False on failure.
+    def fetch_and_store(self):
+        try:
+            logger.info("Connecting to NASA TAP...")
+            service = pyvo.dal.TAPService(Config.NASA_TAP_URL)
+            query = (
+                "SELECT "
+                "pl_name, "
+                "hostname, "
+                "disc_year, "
+                "discoverymethod, "
+                "pl_orbper, "
+                "sy_dist "
+                "FROM ps WHERE default_flag = 1"
+            )
+            results = service.search(query)
+            df = results.to_table().to_pandas()
+            
+            self.repo.update_planets(df)
+            logger.info("NASA sync successful.")
+            return True
+        except Exception as e:
+            logger.error(f"NASA Sync Failed: {e}")
+            return False

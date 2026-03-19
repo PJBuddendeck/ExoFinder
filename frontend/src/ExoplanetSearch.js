@@ -40,7 +40,7 @@ const ExoplanetSearch = () => {
             <th>Planet Name</th>
             <th>Host Star</th>
             <th>Disc. Year</th>
-            <th>Orbital Period (Days)</th>
+            <th>Distance (Parsecs)</th>
           </tr>
         </thead>
         <tbody>
@@ -49,7 +49,7 @@ const ExoplanetSearch = () => {
               <td>{p.pl_name}</td>
               <td>{p.hostname}</td>
               <td>{p.disc_year}</td>
-              <td>{p.pl_orbper}</td>
+              <td>{p.sy_dist}</td>
             </tr>
           ))}
         </tbody>
