@@ -35,7 +35,7 @@ class PlanetRepository:
             conn.execute("INSERT INTO metadata VALUES (?)", (time.time(),))
 
     # Searches for planets in the database based on a search term that matches either the planet name or host star name.
-    # Results are ordered by distance and limited to a specified number (defined in config.py).
+    # Results are ordered by distance and limited to a specified number defined by 
     def search_planets(self, search_term="", limit=50):
         query = "SELECT * FROM planets"
         params = []

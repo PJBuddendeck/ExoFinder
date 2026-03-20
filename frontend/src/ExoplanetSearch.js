@@ -41,6 +41,7 @@ const ExoplanetSearch = () => {
             <th>Host Star</th>
             <th>Disc. Year</th>
             <th>Distance (Parsecs)</th>
+            <th>Equilibrium Temp (K)</th>  
           </tr>
         </thead>
         <tbody>
@@ -50,6 +51,7 @@ const ExoplanetSearch = () => {
               <td>{p.hostname}</td>
               <td>{p.disc_year}</td>
               <td>{p.sy_dist}</td>
+              <td>{p.pl_eqt !== null && p.pl_eqt !== undefined ? p.pl_eqt : "Unknown"}</td>
             </tr>
           ))}
         </tbody>

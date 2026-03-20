@@ -3,6 +3,7 @@ import logging
 import time
 from config import Config
 from data.planet_repo import PlanetRepository
+from services.processor import DataProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -30,11 +31,16 @@ class NasaService:
                 "disc_year, "
                 "discoverymethod, "
                 "pl_orbper, "
-                "sy_dist "
+                "sy_dist, "
+                "st_teff, "
+                "st_rad, "
+                "pl_orbsmax "
                 "FROM ps WHERE default_flag = 1"
             )
             results = service.search(query)
             df = results.to_table().to_pandas()
+
+            df = DataProcessor.clean_and_transform(df)
             
             self.repo.update_planets(df)
             logger.info("NASA sync successful.")
