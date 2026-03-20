@@ -9,7 +9,6 @@ class DataProcessor:
     def clean_and_transform(df: pd.DataFrame) -> pd.DataFrame:
         # 1. Standardize column names (NASA names can be cryptic)
         # Ensure we have the columns needed for the math
-        # Note: NASA columns names are usually: st_teff, st_rad, pl_orbsmax
         
         # 2. Calculate Teq, check if columns exist to avoid crashes
         if all(col in df.columns for col in ['st_teff', 'st_rad', 'pl_orbsmax']):

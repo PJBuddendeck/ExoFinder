@@ -1,5 +1,5 @@
 import React from 'react';
-import ExoplanetSearch from './ExoplanetSearch';
+import ExoplanetSearch from './components/home/ExoplanetSearch';
 
 function App() {
   return (
