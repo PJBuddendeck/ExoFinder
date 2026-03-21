@@ -7,13 +7,13 @@
   border-top: 1px solid #333333; /* Subtle separation for dark mode */
   width: 100%;
   box-sizing: border-box;
-  min-height: 80px; /* This is your 'defined height' */
-  margin-top: auto;  /* Pushes footer to the bottom of a flex container */
+  box-shadow: 0 1000px 0 1000px #000000;
+  margin-top: auto;
 }
 
 .footer-container p {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.875rem;
   letter-spacing: 0.05em;
   text-align: center;
 }
