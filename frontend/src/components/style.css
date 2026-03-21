@@ -1,0 +1,7 @@
+/* Ensure the custom font is available */
+@font-face {
+  font-family: 'SpaceMono';
+  src: url('../assets/SpaceMono-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}

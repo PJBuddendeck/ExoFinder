@@ -1,0 +1,23 @@
+.header-container {
+  align-items: center; /* Vertically centers logo and text */
+  background-color: #000000;
+  color: #ffffff;
+  padding: 1rem 2rem;
+  font-family: 'SpaceMono', monospace;
+  border-bottom: 1px solid #333333; /* Subtle separation for dark mode */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#logo {
+  height: 75px; 
+  width: 100%; /* Maintains aspect ratio */
+  flex-shrink: 0; /* Prevents the logo from squishing on small screens */
+}
+
+.header-container p {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  text-align: center;
+}

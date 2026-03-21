@@ -1,11 +1,13 @@
 import React from 'react';
-import ExoplanetSearch from './components/home/ExoplanetSearch';
+import ExoplanetSearch from './components/ExoplanetSearch/ExoplanetSearch';
+import Header from './components/Header/Header';
+import Footer from './components/Footer/Footer';
 
 function App() {
   return (
     <div>
       <header>
-        <h1>Exoplanet Data Explorer</h1>
+        <Header />
       </header>
 
       <main>
@@ -13,8 +15,7 @@ function App() {
       </main>
 
       <footer>
-        <hr />
-        <p>Source: NASA Exoplanet Archive</p>
+        <Footer />
       </footer>
     </div>
   );

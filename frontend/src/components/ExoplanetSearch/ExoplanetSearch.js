@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './ExoplanetSearch.css';
 
 const ExoplanetSearch = () => {
   const [planets, setPlanets] = useState([]);
@@ -24,7 +25,7 @@ const ExoplanetSearch = () => {
   }, [search]);
 
   return (
-    <div>
+    <div id="search-container">
       <input 
         type="text" 
         placeholder="Search planets..." 
