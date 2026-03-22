@@ -35,15 +35,11 @@ class DataProcessor:
                 df['st_teff'] * np.sqrt(df['st_rad'] / (2 * a_solar)) * (1 - albedo)**0.25
             )
 
-            print(df[df['pl_name']=='1RXS J160929.1-210524 b'][['st_teff', 'st_rad', 'pl_orbsmax', 'pl_eqt']])
-
             # 3. Use fillna: It ONLY fills the NaNs and leaves existing numbers alone
             df['pl_eqt'] = df['pl_eqt'].fillna(calculated_teq)
 
             # 4. Round the final result
             df['pl_eqt'] = df['pl_eqt'].round(2)
-
-            print(df[df['pl_name']=='1RXS J160929.1-210524 b'][['st_teff', 'st_rad', 'pl_orbsmax', 'pl_eqt']])
         
         return df
     

@@ -24,6 +24,11 @@ const ExoplanetSearch = () => {
     return () => clearTimeout(timer);
   }, [search]);
 
+  const formatTemp = (temp) => {
+    if (temp === null || temp === undefined) return "Unknown";
+    return Number(temp).toFixed(1);
+  };
+
   return (
     <div id="search-container">
       <input 
@@ -53,7 +58,7 @@ const ExoplanetSearch = () => {
               <td>{p.hostname}</td>
               <td>{p.disc_year}</td>
               <td>{p.sy_dist}</td>
-              <td>{p.pl_eqt !== null && p.pl_eqt !== undefined ? p.pl_eqt : "Unknown"}</td>
+              <td>{formatTemp(p.pl_eqt)}</td>
             </tr>
           ))}
         </tbody>
