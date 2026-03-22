@@ -12,8 +12,14 @@
 }
 
 .footer-container p {
-  margin: 0;
+  margin: 0 0 1rem 0;
   font-size: 0.875rem;
   letter-spacing: 0.05em;
   text-align: center;
+  padding: 0 10%;
+}
+
+.footer-container a {
+  color: #ffab40;
+  text-decoration: underline;
 }

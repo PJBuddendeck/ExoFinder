@@ -27,6 +27,7 @@ const ExoplanetSearch = () => {
   return (
     <div id="search-container">
       <input 
+        id="search-input"
         type="text" 
         placeholder="Search planets..." 
         value={search} 

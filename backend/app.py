@@ -1,4 +1,6 @@
 import logging
+import pandas as pd
+from datetime import datetime
 from flask import Flask, send_from_directory, jsonify, request
 from flask_cors import CORS
 
@@ -27,6 +29,17 @@ def get_planets():
         return jsonify(data)
     except Exception as e:
         app.logger.error(f"API Error: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@app.route('/api/sync-status', methods=['GET'])
+def get_last_sync():
+    try:
+        last_sync = planet_repo.get_last_sync_time()
+        last_sync = datetime.fromtimestamp(last_sync) if last_sync else None
+        last_sync = pd.to_datetime(last_sync) if last_sync else None
+        return jsonify({"last_sync": last_sync.isoformat()})
+    except Exception as e:
+        app.logger.error(f"Error fetching last sync time: {e}")
         return jsonify({"error": "Internal server error"}), 500
 
 @app.route("/")

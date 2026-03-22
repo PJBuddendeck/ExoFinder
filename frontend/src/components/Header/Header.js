@@ -2,7 +2,7 @@ import { ReactComponent as Logo } from '../../assets/Logo.svg';
 import './Header.css';
 import '../style.css';
 
-function App() {
+function Header() {
   return (
     // Added the 'header-container' class here
     <header className="header-container">
@@ -12,4 +12,4 @@ function App() {
   );
 }
 
-export default App;
+export default Header;
