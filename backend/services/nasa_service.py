@@ -1,6 +1,7 @@
 import pyvo
 import logging
 import time
+import pandas as pd
 from config import Config
 from data.planet_repo import PlanetRepository
 from services.processor import DataProcessor
@@ -35,11 +36,38 @@ class NasaService:
                 "st_teff, "
                 "st_rad, "
                 "pl_orbsmax, "
-                "pl_eqt "
-                "FROM ps WHERE default_flag = 1"
+                "pl_eqt," 
+                "pl_bmasse, "
+                "pl_rade, "
+                "pl_insol "
+                "FROM ps"
             )
             results = service.search(query)
             df = results.to_table().to_pandas()
+
+            aggregation_rules = {
+                'hostname': 'first',
+                'disc_year': 'min',
+                'discoverymethod': 'first',
+                'pl_orbper': 'median',
+                'sy_dist': 'mean',
+                'st_teff': 'mean',
+                'st_rad': 'mean',
+                'pl_orbsmax': 'mean',
+                'pl_eqt': 'mean',
+                'pl_bmasse': 'mean',
+                'pl_rade': 'mean',
+                'pl_insol': 'mean'
+            }
+
+            numeric_cols = ['pl_orbper', 'sy_dist', 'st_teff', 'st_rad', 'pl_orbsmax', 'pl_eqt', 'pl_bmasse', 'pl_rade', 'pl_insol']
+
+            for col in numeric_cols:
+                if col in df.columns:
+                    # errors='coerce' turns non-numeric junk into NaN
+                    df[col] = pd.to_numeric(df[col], errors='coerce')
+
+            df = df.groupby('pl_name', as_index=False).agg(aggregation_rules)
 
             df = DataProcessor.clean_and_transform(df)
             

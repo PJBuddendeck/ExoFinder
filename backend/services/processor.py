@@ -5,6 +5,7 @@ import pandas as pd
 # Includes calculating the equilibrium temperature (Teq) for each planet based on available stellar and orbital parameters. 
 # It also handles any necessary data cleaning to ensure compatibility with our database and frontend display requirements.
 class DataProcessor:
+    # Main entry point for cleaning and transforming the DataFrame.
     def clean_and_transform(df: pd.DataFrame) -> pd.DataFrame:
         # 1. Calculate Equilibrium Temperature (Teq) for each planet
         df = DataProcessor.calc_eqt(df)
@@ -44,5 +45,41 @@ class DataProcessor:
         return df
     
     def calc_esi(df: pd.DataFrame) -> pd.DataFrame:
-        # Calculate ESI, check if columns exist to avoid crashes
+        # 1. Physics Derivations
+        # These will result in NaN if either Bmasse or Rade is missing
+        if 'pl_bmasse' in df.columns and 'pl_rade' in df.columns:
+            df['pl_dens_earth'] = df['pl_bmasse'] / (df['pl_rade']**3)
+            df['pl_vesc_earth'] = np.sqrt(df['pl_bmasse'] / df['pl_rade'])
+
+        # 2. Define the strict requirements
+        cols = ['pl_rade', 'pl_dens_earth', 'pl_vesc_earth', 'pl_insol']
+        weights = np.array([0.57, 1.07, 0.70, 5.58])
+        n = len(weights)
+
+        # 3. Create a Strict Mask
+        # Only True if EVERY required column has a non-null value
+        # .all(axis=1) checks horizontally across the row
+        strict_mask = df[cols].notna().all(axis=1)
+
+        # 4. Initialize the column with NaN (NULL)
+        df['pl_esi'] = np.nan
+
+        # 5. Only perform math on the valid subset
+        if strict_mask.any():
+            # Create a temporary Series for the calculation
+            esi_values = pd.Series(1.0, index=df[strict_mask].index)
+
+            for i, col in enumerate(cols):
+                # Pull only the valid rows for this parameter
+                x = pd.to_numeric(df.loc[strict_mask, col])
+                
+                # Similarity: 1 - |x - 1| / (x + 1)
+                similarity = 1 - (x - 1).abs() / (x + 1)
+                
+                # Update accumulator (Geometric Mean)
+                esi_values *= similarity ** (weights[i] / n)
+
+            # Assign calculated values back to the main DataFrame
+            df.loc[strict_mask, 'pl_esi'] = esi_values.round(3)
+
         return df

@@ -25,7 +25,7 @@ const Footer = memo(() => {
     <footer className="footer-container">
       <p>This website has made use of the <a href="https://exoplanetarchive.ipac.caltech.edu/" target="_blank" rel="noopener noreferrer">NASA Exoplanet Archive</a>, which is operated by the California Institute of Technology, 
         under contract with the National Aeronautics and Space Administration under the Exoplanet Exploration Program.</p>
-      <p>The Planetary Systems Composite Parameters Table DOI can be found <a href="https://doi.org/10.26133/NEA13" target="_blank" rel="noopener noreferrer">here</a>.
+      <p>The Planetary Systems Table DOI can be found <a href="https://doi.org/10.26133/NEA12" target="_blank" rel="noopener noreferrer">here</a>.
         Data was last synced on: <span id="last-sync">{syncTime}</span>.</p>
       <p>Created by <a href="https://pjbuddendeck.github.io/" target="_blank" rel="noopener noreferrer">Peter Buddendeck</a>. Please visit this <a href="https://pjbuddendeck.github.io/#/contact" target="_blank" rel="noopener noreferrer">contact page</a> for any questions or feedback.</p>
     </footer>
