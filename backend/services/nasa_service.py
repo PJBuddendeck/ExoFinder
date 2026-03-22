@@ -34,7 +34,8 @@ class NasaService:
                 "sy_dist, "
                 "st_teff, "
                 "st_rad, "
-                "pl_orbsmax "
+                "pl_orbsmax, "
+                "pl_eqt "
                 "FROM ps WHERE default_flag = 1"
             )
             results = service.search(query)
