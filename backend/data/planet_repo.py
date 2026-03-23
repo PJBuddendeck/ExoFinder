@@ -28,11 +28,23 @@ class PlanetRepository:
     # This operation is atomic to ensure data integrity.
     def update_planets(self, df):
         with self.get_connection() as conn:
-            # Atomic update: Replace table and update metadata in one transaction
+            # 1. Atomic update of the main planets table
             df.to_sql('planets', conn, if_exists='replace', index=False)
-            conn.execute("CREATE TABLE IF NOT EXISTS metadata (last_sync REAL)")
+            
+            # 2. Get the row count from the processed DataFrame
+            total_planets = len(df)
+            
+            # 3. Ensure metadata table exists with two columns: last_sync and total_count
+            conn.execute("CREATE TABLE IF NOT EXISTS metadata (last_sync REAL, total_count INTEGER)")
+            
+            # 4. Clear old metadata
             conn.execute("DELETE FROM metadata")
-            conn.execute("INSERT INTO metadata VALUES (?)", (time.time(),))
+            
+            # 5. Insert current timestamp and the planet count
+            conn.execute(
+                "INSERT INTO metadata (last_sync, total_count) VALUES (?, ?)", 
+                (time.time(), total_planets)
+            )
 
     # Searches for planets in the database based on a search term that matches either the planet name or host star name.
     # Results are ordered by distance and limited to a specified number defined by 
