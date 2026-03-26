@@ -13,7 +13,13 @@ class DataProcessor:
         # 2. Calculate Earth Similarity Index (ESI) for each planet
         df = DataProcessor.calc_esi(df)
 
-        # 3. Final Cleanup: Handle NaNs for the DB
+        # 3. Calculate Habitability Zone for each planet
+        df = DataProcessor.calc_hz(df)
+
+        # 4. Approximate planet type (rocky, gas) for each planet
+        df = DataProcessor.calc_planet_type(df)
+
+        # 5. Final Cleanup: Handle NaNs for the DB
         # SQLite doesn't love NaN, so we replace with None (which becomes NULL)
         df = df.where(pd.notnull(df), None)
 
@@ -82,4 +88,14 @@ class DataProcessor:
             # Assign calculated values back to the main DataFrame
             df.loc[strict_mask, 'pl_esi'] = esi_values.round(3)
 
+        return df
+
+    def calc_hz(df: pd.DataFrame) -> pd.DataFrame:
+        # Placeholder for future HZ calculation logic
+        df['pl_hz'] = None
+        return df
+    
+    def calc_planet_type(df: pd.DataFrame) -> pd.DataFrame:
+        # Placeholder for future planet type classification logic
+        df['pl_type'] = None
         return df

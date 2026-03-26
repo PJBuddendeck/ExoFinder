@@ -25,7 +25,8 @@ class NasaService:
         try:
             logger.info("Connecting to NASA TAP...")
             service = pyvo.dal.TAPService(Config.NASA_TAP_URL)
-            query = (
+
+            query_ps = (
                 "SELECT "
                 "pl_name, "
                 "hostname, "
@@ -42,10 +43,35 @@ class NasaService:
                 "pl_insol "
                 "FROM ps"
             )
-            results = service.search(query)
-            df = results.to_table().to_pandas()
+            df_ps = service.search(query_ps).to_table().to_pandas()
 
-            aggregation_rules = {
+            query_spec = (
+                "SELECT "
+                "pl_name, "
+                "spec_type, "
+                "num_datapoints, "
+                "instrument, "
+                "facility AS spec_facility,"
+                "minwavelng, "
+                "maxwavelng "
+                "FROM spectra"
+            )
+            df_spec = service.search(query_spec).to_table().to_pandas()
+
+            ps_numeric_cols = ['pl_orbper', 'sy_dist', 'st_teff', 'st_rad', 'pl_orbsmax', 'pl_eqt', 'pl_bmasse', 'pl_rade', 'pl_insol']
+            spec_numeric_cols = ['num_datapoints', 'minwavelng', 'maxwavelng']
+
+            for col in ps_numeric_cols:
+                if col in df_ps.columns:
+                    # errors='coerce' turns non-numeric junk into NaN
+                    df_ps[col] = pd.to_numeric(df_ps[col], errors='coerce')
+
+            for col in spec_numeric_cols:
+                if col in df_spec.columns:
+                    # errors='coerce' turns non-numeric junk into NaN
+                    df_spec[col] = pd.to_numeric(df_spec[col], errors='coerce')
+
+            ps_aggregation_rules = {
                 'hostname': 'first',
                 'disc_year': 'min',
                 'discoverymethod': 'first',
@@ -60,14 +86,20 @@ class NasaService:
                 'pl_insol': 'mean'
             }
 
-            numeric_cols = ['pl_orbper', 'sy_dist', 'st_teff', 'st_rad', 'pl_orbsmax', 'pl_eqt', 'pl_bmasse', 'pl_rade', 'pl_insol']
+            df_ps = df_ps.groupby('pl_name', as_index=False).agg(ps_aggregation_rules)
 
-            for col in numeric_cols:
-                if col in df.columns:
-                    # errors='coerce' turns non-numeric junk into NaN
-                    df[col] = pd.to_numeric(df[col], errors='coerce')
+            spec_aggregation_rules = {
+                'spec_type': lambda x: ', '.join(set(x.dropna())),
+                'num_datapoints' : 'sum',
+                'instrument' : lambda x: ', '.join(set(x.dropna())),
+                'spec_facility': lambda x: ', '.join(set(x.dropna())),
+                'minwavelng' : 'min',
+                'maxwavelng' : 'max'
+            }
 
-            df = df.groupby('pl_name', as_index=False).agg(aggregation_rules)
+            df_spec = df_spec.groupby('pl_name', as_index=False).agg(spec_aggregation_rules)
+
+            df = pd.merge(df_ps, df_spec, on='pl_name', how='left')
 
             df = DataProcessor.clean_and_transform(df)
             

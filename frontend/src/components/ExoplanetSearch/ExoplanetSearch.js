@@ -24,9 +24,14 @@ const ExoplanetSearch = () => {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const formatTemp = (temp) => {
-    if (temp === null || temp === undefined) return "Unknown";
-    return Number(temp).toFixed(1);
+  const formatUnknown = (value) => {
+    return value === null || value === undefined ? "Unknown" : value;
+  };
+
+  const formatDecimal = (value, dec) => {
+    value = formatUnknown(value);
+    if (value=='Unknown') return "Unknown";
+    return Number(value).toFixed(dec);
   };
 
   return (
@@ -48,6 +53,8 @@ const ExoplanetSearch = () => {
             <th>Host Star</th>
             <th>Disc. Year</th>
             <th>Distance (Parsecs)</th>
+            <th>Mass (Earth Masses)</th>
+            <th>Radius (Earth Radii)</th>
             <th>Equilibrium Temp (K)</th>  
           </tr>
         </thead>
@@ -56,9 +63,11 @@ const ExoplanetSearch = () => {
             <tr key={i}>
               <td>{p.pl_name}</td>
               <td>{p.hostname}</td>
-              <td>{p.disc_year}</td>
-              <td>{p.sy_dist}</td>
-              <td>{formatTemp(p.pl_eqt)}</td>
+              <td>{formatUnknown(p.disc_year)}</td>
+              <td>{formatDecimal(p.sy_dist, 3)}</td>
+              <td>{formatDecimal(p.pl_bmasse, 3)}</td>
+              <td>{formatDecimal(p.pl_rade, 3)}</td>
+              <td>{formatDecimal(p.pl_eqt, 1)}</td>
             </tr>
           ))}
         </tbody>
