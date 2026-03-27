@@ -13,30 +13,51 @@
 }
 
 .modal-content {
-  background: #1a1a2e;
-  border: 1px solid #4db8ff;
+  background: #1a1d23;
+  border: 1px solid #ab40ff;
   border-radius: 16px;
   width: 90%;
   max-width: 1000px;
-  max-height: 95vh;
-  padding: 2rem;
+  max-height: 85vh; /* Increased slightly for better visibility */
   position: relative;
   color: white;
-  box-shadow: 0 0 30px rgba(77, 184, 255, 0.2);
+  box-shadow: 0 0 30px rgba(171, 64, 255, 0.2);
+  
+  /* CRITICAL: Must be a flex container to allow scroll-area to grow */
+  display: flex;
+  flex-direction: column;
+  padding: 0; /* REMOVED padding here to allow scrolling to reach edges */
+  overflow: hidden; /* Keeps the rounded corners clean */
 }
 
+/* 1. Header stays pinned to the top */
+.modal-header {
+  padding: 2rem 2.5rem 1rem 2.5rem;
+  flex-shrink: 0; /* Prevents header from being squished */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.modal-header h2 {
+  color: #ab40ff;
+  margin: 0;
+}
+
+/* 2. Scrollable area takes the remaining space */
 .modal-scroll-area {
-  padding: 0 2rem 2rem 2rem;
-  overflow-y: auto; /* This enables the scrollbar */
-  flex-grow: 1;
+  padding: 1rem 2.5rem 2rem 2.5rem; /* Padding handled here instead */
+  overflow-y: auto; 
+  flex-grow: 1; /* Tells this div to use all available vertical space */
+  
+  /* Smooth scrolling for modern browsers */
+  scroll-behavior: smooth;
 }
 
 /* 3. Custom Scrollbar Styling (Webkit) */
 .modal-scroll-area::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 .modal-scroll-area::-webkit-scrollbar-thumb {
-  background: #4db8ff;
+  background: #ab40ff;
   border-radius: 10px;
 }
 .modal-scroll-area::-webkit-scrollbar-track {
@@ -52,18 +73,15 @@
   color: #888;
   font-size: 1.5rem;
   cursor: pointer;
-}
-
-.modal-header h2 {
-  color: #4db8ff;
-  margin: 0;
+  z-index: 1010; /* Ensure it stays above the scroll area */
 }
 
 .info-group {
   margin-top: 1.5rem;
-  padding: 1rem;
+  padding: 1.5rem;
   background: rgba(255, 255, 255, 0.03);
   border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .info-group h4 {
@@ -72,10 +90,5 @@
   text-transform: uppercase;
   font-size: 0.75rem;
   letter-spacing: 1px;
-}
-
-/* 1. Header stays pinned to the top */
-.modal-header {
-  padding: 2rem 2rem 1rem 2rem;
-  flex-shrink: 0;
+  margin-bottom: 1rem;
 }

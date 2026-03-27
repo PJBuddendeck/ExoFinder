@@ -48,7 +48,7 @@ class PlanetRepository:
 
     # Searches for planets in the database based on a search term that matches either the planet name or host star name.
     # Results are ordered by distance and limited to a specified number defined by 
-    def search_planets(self, search_term="", limit=50):
+    def search_planets(self, search_term="", limit=48):
         query = "SELECT * FROM planets"
         params = []
         
