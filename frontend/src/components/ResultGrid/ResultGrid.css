@@ -1,0 +1,103 @@
+/* Container for the entire grid */
+.results-grid {
+  display: grid;
+  /* Responsively fills space with cards at least 280px wide */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+  width: 100%;
+}
+
+/* Individual Planet Rectangle */
+.planet-card {
+  background: #1a1d23; /* Deep space midnight blue */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle hover effect for interactivity */
+.planet-card:hover {
+  transform: translateY(-5px);
+  border-color: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 10px rgba(77, 184, 255, 0.2);
+}
+
+/* Header Section */
+.card-header h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.3rem;
+  letter-spacing: 0.5px;
+}
+
+.host-star {
+  display: block;
+  font-size: 0.85rem;
+  color: #888;
+  margin-top: 4px;
+}
+
+/* Data Grid (2 columns inside the card) */
+.card-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-item label {
+  font-size: 0.65rem;
+  color: #555;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.stat-item span {
+  font-family: 'Inter', sans-serif; /* Or 'JetBrains Mono' for a tech look */
+  font-size: 0.95rem;
+  color: #e0e0e0;
+}
+
+/* Footer & Badges */
+.card-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.temp-badge {
+  background: rgba(77, 184, 255, 0.1);
+  color: #4db8ff;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid rgba(77, 184, 255, 0.2);
+}
+
+.esi-badge {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid rgba(76, 175, 80, 0.2);
+}

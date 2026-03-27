@@ -1,7 +1,6 @@
 #search-container {
   background-image: linear-gradient(90deg, #ab40ff, #ffab40);
   color: #e0e0e0; /* Off-white text for better readability on dark backgrounds */
-  
   min-height: 50vh; /* Ensures the background covers the full screen height */
   padding: 2rem;
   font-family: 'SpaceMono', monospace;
@@ -14,8 +13,9 @@
   border: 1px solid #333;
   color: #ffffff;
   padding: 10px 15px;
-  width: 100%;
+  width: 75%;
   max-width: 400px;
+  min-width: minmax(280px, 1fr);
   font-family: inherit;
   border-radius: 4px;
   margin-bottom: 20px;
