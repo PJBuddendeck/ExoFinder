@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './ExoplanetSearch.css';
 import ResultGrid from '../ResultGrid/ResultGrid'
+import PlanetDashboard from '../PlanetDashboard/PlanetDashboard'
 
 const ExoplanetSearch = () => {
   const [planets, setPlanets] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedPlanet, setSelectedPlanet] = useState(null);
 
   useEffect(() => {
     const fetchPlanets = async () => {
@@ -39,7 +41,15 @@ const ExoplanetSearch = () => {
 
       <ResultGrid 
           planets={planets}
+          onPlanetClick={(planet)=> setSelectedPlanet(planet)}
         />
+
+      {selectedPlanet && (
+        <PlanetDashboard 
+          planet={selectedPlanet} 
+          onClose={() => setSelectedPlanet(null)} 
+        />
+      )}
     </div>
   );
 };

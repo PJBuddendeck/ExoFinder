@@ -11,11 +11,17 @@ const formatDecimal = (value, dec) => {
     return Number(value).toFixed(dec);
 };
 
-const ResultGrid = ({ planets }) => {
+const ResultGrid = ({ planets, onPlanetClick }) => {
   return (
     <div className="results-grid">
       {planets.map((p, i) => (
-        <div key={i} className="planet-card">
+        
+        <div 
+          key={i} 
+          className="planet-card" 
+          onClick={() => onPlanetClick(p)} // Call the function here
+          style={{ cursor: 'pointer' }}
+        >
           <div className="card-header">
             <h3>{p.pl_name}</h3>
             <span className="host-star">System: {p.hostname}</span>

@@ -1,0 +1,81 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: #1a1a2e;
+  border: 1px solid #4db8ff;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 1000px;
+  max-height: 95vh;
+  padding: 2rem;
+  position: relative;
+  color: white;
+  box-shadow: 0 0 30px rgba(77, 184, 255, 0.2);
+}
+
+.modal-scroll-area {
+  padding: 0 2rem 2rem 2rem;
+  overflow-y: auto; /* This enables the scrollbar */
+  flex-grow: 1;
+}
+
+/* 3. Custom Scrollbar Styling (Webkit) */
+.modal-scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-scroll-area::-webkit-scrollbar-thumb {
+  background: #4db8ff;
+  border-radius: 10px;
+}
+.modal-scroll-area::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.modal-header h2 {
+  color: #4db8ff;
+  margin: 0;
+}
+
+.info-group {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.info-group h4 {
+  margin-top: 0;
+  color: #aaa;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+}
+
+/* 1. Header stays pinned to the top */
+.modal-header {
+  padding: 2rem 2rem 1rem 2rem;
+  flex-shrink: 0;
+}
