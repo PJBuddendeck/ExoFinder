@@ -5,13 +5,13 @@ import PlanetDashboard from '../PlanetDashboard/PlanetDashboard';
 
 const ExoplanetSearch = () => {
   const [planets, setPlanets] = useState([]);
-  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedPlanet, setSelectedPlanet] = useState(null);
   
-  // New Sorting States
+  const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('sy_dist'); 
   const [sortOrder, setSortOrder] = useState('asc');
+  const [filterMenu, setFilterMenu] = useState(false);
 
   useEffect(() => {
     if (sortBy === 'pl_esi' && sortOrder !== 'desc') {
@@ -49,7 +49,9 @@ const ExoplanetSearch = () => {
           value={search} 
           onChange={(e) => setSearch(e.target.value)} 
         />
-
+        <button onClick={(e) => setFilterMenu(!filterMenu)}>Sort/Filter</button>
+      </div>
+      <div className={`filters-row ${filterMenu ? 'is-open' : ''}`}>
         <div className="filter-group">
           {/* Dropdown 1: The Field */}
           <select 
@@ -62,7 +64,7 @@ const ExoplanetSearch = () => {
             <option value="pl_rade">Radius</option>
             <option value="disc_year">Discovery Year</option>
             <option value="pl_eqt">Temperature (EQT)</option>
-            <option value="pl_esi">ESI (Habitability)</option>
+            <option value="pl_esi">ESI</option>
           </select>
 
           {/* Dropdown 2: The Direction */}
@@ -70,7 +72,7 @@ const ExoplanetSearch = () => {
             className={`filter-dropdown ${sortBy === 'pl_esi' ? 'is-disabled' : ''}`}
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value)}
-            disabled = {sortBy === 'pl_esi'}
+            disabled={sortBy === 'pl_esi'}
           >
             <option value="asc">Ascending</option>
             <option value="desc">Descending</option>
