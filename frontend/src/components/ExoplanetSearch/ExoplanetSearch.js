@@ -80,7 +80,7 @@ const ExoplanetSearch = () => {
         </div>
       </div>
 
-      {loading ? <p className="loading-text">Scanning deep space...</p> : (
+      {loading ? <p className="loading-text">Loading...</p> : (
         <ResultGrid 
           planets={planets}
           onPlanetClick={(planet) => setSelectedPlanet(planet)}
