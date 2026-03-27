@@ -48,16 +48,36 @@ class PlanetRepository:
 
     # Searches for planets in the database based on a search term that matches either the planet name or host star name.
     # Results are ordered by distance and limited to a specified number defined by 
-    def search_planets(self, search_term="", limit=48):
+    def search_planets(self, search_term="", sort_by="sy_dist", sort_order="asc", limit=48):
+        # 1. Map frontend keys to actual DB column names to prevent SQL injection
+        allowed_columns = {
+            "sy_dist": "sy_dist",
+            "pl_bmasse": "pl_bmasse",
+            "pl_rade": "pl_rade",
+            "disc_year": "disc_year",
+            "pl_eqt": "pl_eqt",
+            "pl_esi": "pl_esi"
+        }
+        
+        column = allowed_columns.get(sort_by, "sy_dist")
+        direction = "ASC" if sort_order.lower() == "asc" else "DESC"
+        
         query = "SELECT * FROM planets"
         params = []
         
+        # 2. Filtering
         if search_term:
             query += " WHERE LOWER(pl_name) LIKE ? OR LOWER(hostname) LIKE ?"
             term = f"%{search_term.lower()}%"
             params = [term, term]
         
-        query += " ORDER BY sy_dist ASC NULLS LAST LIMIT ?"
+        # 3. Dynamic Sorting with NULLS LAST logic
+        # SQLite trick: (column IS NULL) returns 1 for nulls, 0 for data.
+        # Sorting by this first ensures nulls are always at the bottom.
+        query += f" ORDER BY ({column} IS NULL) ASC, {column} {direction}, pl_name ASC"
+        
+        # 4. Pagination/Limits
+        query += " LIMIT ?"
         params.append(limit)
 
         with self.get_connection() as conn:

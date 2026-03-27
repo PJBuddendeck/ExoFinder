@@ -51,7 +51,7 @@ const ResultGrid = ({ planets, onPlanetClick }) => {
             <span className="temp-badge">EQT: {formatDecimal(p.pl_eqt, 0)} K</span>
             )}
             {p.pl_esi && (
-              <span className="esi-badge">ESI: {p.pl_esi}</span>
+              <span className="esi-badge">ESI: {formatDecimal(p.pl_esi, 3)}</span>
             )}
           </div>
         </div>

@@ -21,6 +21,63 @@
   margin-bottom: 20px;
 }
 
+/* --- Filter and Search Control Layout --- */
+.controls-row {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap; /* Wraps on mobile screens */
+  margin-bottom: 25px;
+}
+
+/* Ensure the search input doesn't force a margin-bottom when in a row */
+#search-container .controls-row input {
+  margin-bottom: 0;
+  flex: 1; /* Allows search bar to grow */
+}
+
+/* Style for the Filter Dropdown Wrapper */
+.filter-group {
+  display: flex;
+  align-items: center;
+}
+
+/* The actual Select/Dropdown styling */
+.filter-dropdown {
+  background-color: #1a1d23;
+  border: 1px solid #333;
+  color: #ffffff;
+  padding: 10px 15px;
+  border-radius: 4px;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-dropdown:hover {
+  border-color: #ffffff; /* Matches your orange gradient theme */
+  box-shadow: 0 0 8px rgba(171, 64, 255, 0.3);
+}
+
+.filter-dropdown:focus {
+  border-color: #ffffff;
+}
+
+.filter-dropdown:disabled {
+  color: #555;
+  background-color: #0d0f14;
+  cursor: not-allowed;
+}
+
+/* Optional: Style for the loading text animation */
+.loading-text {
+  color: #ffffff;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  display: block;
+}
+
 /* Style the table for the dark background */
 table {
   border-collapse: collapse;

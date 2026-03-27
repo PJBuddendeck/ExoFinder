@@ -19,17 +19,13 @@ nasa_service = NasaService()
 
 @app.route('/api/planets', methods=['GET'])
 def get_planets():
-    search_term = request.args.get('search', '').strip()
+    search = request.args.get('search', '')
+    sort_by = request.args.get('sort', 'sy_dist')
+    order = request.args.get('order', 'asc')
     
-    try:
-        # Ensure data is fresh before querying
-        nasa_service.sync_if_expired()
-        
-        data = planet_repo.search_planets(search_term)
-        return jsonify(data)
-    except Exception as e:
-        app.logger.error(f"API Error: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+    repo = PlanetRepository()
+    planets = repo.search_planets(search_term=search, sort_by=sort_by, sort_order=order)
+    return jsonify(planets)
 
 @app.route('/api/sync-status', methods=['GET'])
 def get_last_sync():

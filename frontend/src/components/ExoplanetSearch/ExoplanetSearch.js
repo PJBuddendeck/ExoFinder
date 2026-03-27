@@ -1,19 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import './ExoplanetSearch.css';
-import ResultGrid from '../ResultGrid/ResultGrid'
-import PlanetDashboard from '../PlanetDashboard/PlanetDashboard'
+import ResultGrid from '../ResultGrid/ResultGrid';
+import PlanetDashboard from '../PlanetDashboard/PlanetDashboard';
 
 const ExoplanetSearch = () => {
   const [planets, setPlanets] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedPlanet, setSelectedPlanet] = useState(null);
+  
+  // New Sorting States
+  const [sortBy, setSortBy] = useState('sy_dist'); 
+  const [sortOrder, setSortOrder] = useState('asc');
+
+  useEffect(() => {
+    if (sortBy === 'pl_esi' && sortOrder !== 'desc') {
+      setSortOrder('desc');
+    }
+  }, [sortBy, sortOrder]);
 
   useEffect(() => {
     const fetchPlanets = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/planets?search=${encodeURIComponent(search)}`);
+        // We pass the sort parameters to your API
+        const url = `/api/planets?search=${encodeURIComponent(search)}&sort=${sortBy}&order=${sortOrder}`;
+        const res = await fetch(url);
         const data = await res.json();
         setPlanets(data);
       } catch (err) {
@@ -25,24 +37,53 @@ const ExoplanetSearch = () => {
 
     const timer = setTimeout(fetchPlanets, 500);
     return () => clearTimeout(timer);
-  }, [search]);
+  }, [search, sortBy, sortOrder]); // Re-run when search OR sort changes
 
   return (
     <div id="search-container">
-      <input 
-        id="search-input"
-        type="text" 
-        placeholder="Search planets..." 
-        value={search} 
-        onChange={(e) => setSearch(e.target.value)} 
-      />
-
-      {loading && <p>Loading...</p>}
-
-      <ResultGrid 
-          planets={planets}
-          onPlanetClick={(planet)=> setSelectedPlanet(planet)}
+      <div className="controls-row">
+        <input 
+          id="search-input"
+          type="text" 
+          placeholder="Search planets..." 
+          value={search} 
+          onChange={(e) => setSearch(e.target.value)} 
         />
+
+        <div className="filter-group">
+          {/* Dropdown 1: The Field */}
+          <select 
+            className="filter-dropdown"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <option value="sy_dist">Distance</option>
+            <option value="pl_bmasse">Mass</option>
+            <option value="pl_rade">Radius</option>
+            <option value="disc_year">Discovery Year</option>
+            <option value="pl_eqt">Temperature (EQT)</option>
+            <option value="pl_esi">ESI (Habitability)</option>
+          </select>
+
+          {/* Dropdown 2: The Direction */}
+          <select 
+            className={`filter-dropdown ${sortBy === 'pl_esi' ? 'is-disabled' : ''}`}
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            disabled = {sortBy === 'pl_esi'}
+          >
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+        </div>
+      </div>
+
+      {loading ? <p className="loading-text">Scanning deep space...</p> : (
+        <ResultGrid 
+          planets={planets}
+          onPlanetClick={(planet) => setSelectedPlanet(planet)}
+        />
+      )}
 
       {selectedPlanet && (
         <PlanetDashboard 
