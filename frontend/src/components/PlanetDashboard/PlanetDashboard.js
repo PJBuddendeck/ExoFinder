@@ -43,7 +43,7 @@ return (
           <div className="system-grid">
               <p><strong>Mass:</strong> {formatDecimal(planet.pl_bmasse, 2)} M⊕</p>
               <p><strong>Radius:</strong> {formatDecimal(planet.pl_rade, 2)} R⊕</p>
-              <p><strong>ESI:</strong> {formatDecimal(planet.pl_esi)}</p>
+              <p><strong>ESI:</strong> {formatDecimal(planet.pl_esi, 3)}</p>
           </div>
         </div>
 
