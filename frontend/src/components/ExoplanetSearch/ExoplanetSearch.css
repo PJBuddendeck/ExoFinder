@@ -36,7 +36,7 @@
   gap: 15px;
   align-items: center;
   flex-wrap: wrap; /* Wraps on mobile screens */
-  margin-bottom: 25px;
+  padding: 10px 0;
 }
 
 /* Ensure the search input doesn't force a margin-bottom when in a row */
@@ -60,9 +60,8 @@
 
 /* 2. The Open State */
 .filters-row.is-open {
-  max-height: 100px; /* Adjust based on your dropdown height */
+  max-height: 1000px;
   opacity: 1;
-  margin-bottom: 25px; /* Adds space when visible */
 }
 
 #search-container button {
@@ -80,12 +79,28 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 5px 0; /* Prevents text from clipping during the slide */
+  background-color: #1a1d23;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0 10px;
+}
+
+.filter-group label {
+  display: inline-flex;
+  align-items: top;
+}
+
+.filter-group label input {
+  width: 16px !important;
+  height: 16px;
+  accent-color: #ab40ff;
+  margin-right: 5px;
+  margin-bottom: 0px !important;
 }
 
 /* The actual Select/Dropdown styling */
 .filter-dropdown {
-  background-color: #1a1d23;
+  background-color: #21242a;
   border: 1px solid #333;
   color: #ffffff;
   padding: 5px 3px;
@@ -94,6 +109,7 @@
   cursor: pointer;
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
 }
 
 .filter-dropdown:hover {

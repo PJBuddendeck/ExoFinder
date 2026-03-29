@@ -11,6 +11,13 @@ const formatDecimal = (value, dec) => {
     return Number(value).toFixed(dec);
 };
 
+const formatESI = (value) => {
+    value = formatDecimal(value, 3);
+    if (value === "Unknown") return "Unknown";
+    if (value == 0) return "0.0";
+    return value;
+};
+
 const ResultGrid = ({ planets, onPlanetClick }) => {
   return (
     <div className="results-grid">
@@ -50,8 +57,8 @@ const ResultGrid = ({ planets, onPlanetClick }) => {
             {p.pl_eqt && (
             <span className="temp-badge">EQT: {formatDecimal(p.pl_eqt, 0)} K</span>
             )}
-            {p.pl_esi && (
-              <span className="esi-badge">ESI: {formatDecimal(p.pl_esi, 3)}</span>
+            {(p.pl_esi || p.pl_esi==0) && (
+              <span className="esi-badge">ESI: {formatESI(p.pl_esi, 3)}</span>
             )}
           </div>
         </div>

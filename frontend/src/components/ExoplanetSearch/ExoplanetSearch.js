@@ -13,6 +13,9 @@ const ExoplanetSearch = () => {
   const [sortOrder, setSortOrder] = useState('asc');
   const [filterMenu, setFilterMenu] = useState(false);
 
+  const [hasEqt, setHasEqt] = useState(false);
+  const [hasEsi, setHasEsi] = useState(false);
+
   useEffect(() => {
     if (sortBy === 'pl_esi' && sortOrder !== 'desc') {
       setSortOrder('desc');
@@ -24,7 +27,8 @@ const ExoplanetSearch = () => {
       setLoading(true);
       try {
         // We pass the sort parameters to your API
-        const url = `/api/planets?search=${encodeURIComponent(search)}&sort=${sortBy}&order=${sortOrder}`;
+        const url = `/api/planets?search=${encodeURIComponent(search)}&sort=${sortBy}&order=${sortOrder}&hasEqt=${hasEqt}&hasEsi=${hasEsi}`;
+        console.log(hasEqt, hasEsi);
         const res = await fetch(url);
         const data = await res.json();
         setPlanets(data);
@@ -37,7 +41,7 @@ const ExoplanetSearch = () => {
 
     const timer = setTimeout(fetchPlanets, 500);
     return () => clearTimeout(timer);
-  }, [search, sortBy, sortOrder]); // Re-run when search OR sort changes
+  }, [search, sortBy, sortOrder, hasEqt, hasEsi]); // Re-run when search OR sort changes
 
   return (
     <div id="search-container">
@@ -54,6 +58,7 @@ const ExoplanetSearch = () => {
       <div className={`filters-row ${filterMenu ? 'is-open' : ''}`}>
         <div className="filter-group">
           {/* Dropdown 1: The Field */}
+          <p>Sort by&nbsp;
           <select 
             className="filter-dropdown"
             value={sortBy}
@@ -66,7 +71,7 @@ const ExoplanetSearch = () => {
             <option value="pl_eqt">Temperature (EQT)</option>
             <option value="pl_esi">ESI</option>
           </select>
-
+          &nbsp;in&nbsp;
           {/* Dropdown 2: The Direction */}
           <select 
             className={`filter-dropdown ${sortBy === 'pl_esi' ? 'is-disabled' : ''}`}
@@ -77,6 +82,26 @@ const ExoplanetSearch = () => {
             <option value="asc">Ascending</option>
             <option value="desc">Descending</option>
           </select>
+          &nbsp;order.
+          <br/>
+          <br/>
+          {/* Checkboxes */}
+          <label>
+            <input 
+              type="checkbox"
+              checked={hasEqt}
+              onChange={(e) => setHasEqt(e.target.checked)}
+            />Has Equilibrium Temperature (EQT) value.
+          </label>
+          &nbsp;&nbsp;
+          <label>
+            <input 
+              type="checkbox"
+              checked={hasEsi}
+              onChange={(e) => setHasEsi(e.target.checked)}
+            />Has Earth Similarity Index (ESI) value.
+          </label>
+          </p>
         </div>
       </div>
 

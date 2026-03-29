@@ -1,6 +1,7 @@
 import sqlite3
 import time
 import os
+from warnings import filters
 from config import Config
 
 # This class abstracts all database interactions related to exoplanet data and metadata (like last sync time).
@@ -48,8 +49,7 @@ class PlanetRepository:
 
     # Searches for planets in the database based on a search term that matches either the planet name or host star name.
     # Results are ordered by distance and limited to a specified number defined by 
-    def search_planets(self, search_term="", sort_by="sy_dist", sort_order="asc", limit=48):
-        # 1. Map frontend keys to actual DB column names to prevent SQL injection
+    def search_planets(self, search_term="", sort_by="sy_dist", sort_order="asc", limit=48, has_eqt=False, has_esi=False):
         allowed_columns = {
             "sy_dist": "sy_dist",
             "pl_bmasse": "pl_bmasse",
@@ -62,24 +62,32 @@ class PlanetRepository:
         column = allowed_columns.get(sort_by, "sy_dist")
         direction = "ASC" if sort_order.lower() == "asc" else "DESC"
         
+        # 1. Start with the base query
         query = "SELECT * FROM planets"
+        conditions = []
         params = []
         
-        # 2. Filtering
+        # 2. Collect all conditions
         if search_term:
-            query += " WHERE LOWER(pl_name) LIKE ? OR LOWER(hostname) LIKE ?"
+            conditions.append("(LOWER(pl_name) LIKE ? OR LOWER(hostname) LIKE ?)")
             term = f"%{search_term.lower()}%"
-            params = [term, term]
+            params.extend([term, term])
         
-        # 3. Dynamic Sorting with NULLS LAST logic
-        # SQLite trick: (column IS NULL) returns 1 for nulls, 0 for data.
-        # Sorting by this first ensures nulls are always at the bottom.
-        query += f" ORDER BY ({column} IS NULL) ASC, {column} {direction}, pl_name ASC"
+        if has_eqt:
+            conditions.append("pl_eqt IS NOT NULL")
+            
+        if has_esi:
+            conditions.append("pl_esi IS NOT NULL")
+
+        # 3. Add WHERE clause ONLY if we have conditions
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
         
-        # 4. Pagination/Limits
-        query += " LIMIT ?"
+        # 4. CRITICAL: Add a space BEFORE the ORDER BY
+        query += f" ORDER BY ({column} IS NULL) ASC, {column} {direction}, pl_name ASC LIMIT ?"
         params.append(limit)
 
         with self.get_connection() as conn:
+            # For debugging, you can print(query) here to see the final string
             rows = conn.execute(query, params).fetchall()
             return [dict(row) for row in rows]

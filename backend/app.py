@@ -24,9 +24,11 @@ def get_planets():
         search = request.args.get('search', '')
         sort_by = request.args.get('sort', 'sy_dist')
         order = request.args.get('order', 'asc')
-        
+        has_eqt = request.args.get('hasEqt', 'false').lower() == 'true'
+        has_esi = request.args.get('hasEsi', 'false').lower() == 'true'
+
         repo = PlanetRepository()
-        planets = repo.search_planets(search_term=search, sort_by=sort_by, sort_order=order)
+        planets = repo.search_planets(search_term=search, sort_by=sort_by, sort_order=order, has_eqt=has_eqt, has_esi=has_esi)
         return jsonify(planets)
     except Exception as e:
         app.logger.error(f"API Error: {e}")
